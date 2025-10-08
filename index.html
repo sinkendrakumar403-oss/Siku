@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Converter & Optimizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .drag-over {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff; /* blue-50 */
+        }
+        .tab-active {
+            border-color: #3b82f6; /* blue-500 */
+            color: #3b82f6; /* blue-500 */
+            background-color: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-xl space-y-6">
+        <!-- Header Section -->
+        <header class="text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-800">AI Converter & Optimizer</h1>
+            <p class="text-slate-500 mt-2">Convert files, reduce size, and get AI insights.</p>
+        </header>
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-slate-200">
+            <button id="image-tab" class="tab-active flex-1 py-3 px-4 text-sm font-medium text-center text-slate-600 border-b-2 border-transparent hover:text-blue-600 transition-colors duration-300">Image & PDF Tools</button>
+            <button id="unit-tab" class="flex-1 py-3 px-4 text-sm font-medium text-center text-slate-600 border-b-2 border-transparent hover:text-blue-600 transition-colors duration-300">MB to KB</button>
+        </div>
+
+        <!-- Image & PDF Converter Section -->
+        <div id="image-converter-section" class="space-y-4 pt-4">
+            <div id="image-upload-container">
+                <label for="image-upload-input" id="image-drop-area" class="flex justify-center w-full h-40 px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors duration-300">
+                    <div class="space-y-1 text-center self-center">
+                         <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        <p class="text-sm text-slate-600">Drag & drop or click to upload</p>
+                        <p class="text-xs text-slate-500">Supports JPG, PNG</p>
+                    </div>
+                    <input id="image-upload-input" type="file" class="sr-only" accept="image/jpeg, image/png">
+                </label>
+            </div>
+
+            <div id="image-processing-container" class="hidden space-y-4">
+                <div class="w-full bg-slate-50 p-2 rounded-lg border">
+                    <img id="image-preview" src="#" alt="Image preview" class="max-h-60 w-auto mx-auto rounded">
+                </div>
+                <div>
+                    <label for="format-select" class="block text-sm font-medium text-slate-700">Convert to:</label>
+                    <select id="format-select" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="png">PNG</option>
+                        <option value="jpeg">JPG</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                </div>
+                <div id="quality-container" class="hidden space-y-2">
+                    <div class="flex justify-between">
+                        <label for="quality-slider" class="block text-sm font-medium text-slate-700">Quality (Reduce Size):</label>
+                        <span id="quality-value" class="text-sm font-medium text-slate-600">92%</span>
+                    </div>
+                    <input id="quality-slider" type="range" min="10" max="100" value="92" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <button id="convert-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Convert & Download</button>
+                
+                <!-- Gemini AI Tools Section -->
+                <div class="pt-4 border-t space-y-3">
+                    <h3 class="text-lg font-semibold text-center text-slate-700">AI Tools</h3>
+                    <!-- Alt Text -->
+                    <div class="space-y-2">
+                        <button id="generate-alt-text-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 disabled:opacity-50">âœ¨ Generate Alt-Text</button>
+                        <div id="alt-text-loader" class="hidden flex justify-center items-center h-10"><svg class="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                        <div id="alt-text-result-container" class="hidden relative">
+                            <p id="alt-text-result" class="w-full text-sm bg-slate-50 border rounded-md p-3 pr-10 text-slate-800"></p>
+                            <button id="copy-alt-text-btn" title="Copy" class="absolute top-1/2 -translate-y-1/2 right-2 p-1 rounded-md text-slate-500 hover:bg-slate-200"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.5 2a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-1 0V3H3.5a.5.5 0 0 1 0-1H13.5z"/><path d="M2 3.5a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V8.5a.5.5 0 0 0-1 0V15H2.5V4H8a.5.5 0 0 0 0-1H2.5a.5.5 0 0 0-.5.5z"/></svg></button>
+                        </div>
+                        <p id="alt-text-error" class="text-center text-sm text-red-500 hidden"></p>
+                    </div>
+                    <!-- Social Media Post -->
+                    <div class="space-y-2">
+                        <button id="generate-post-btn" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">ðŸš€ Generate Social Media Post</button>
+                        <div id="post-loader" class="hidden flex justify-center items-center h-10"><svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                        <div id="post-result-container" class="hidden">
+                            <textarea id="post-result" rows="4" readonly class="w-full text-sm bg-slate-50 border rounded-md p-3 text-slate-800 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        </div>
+                        <p id="post-error" class="text-center text-sm text-red-500 hidden"></p>
+                    </div>
+                </div>
+                <button id="reset-btn" class="w-full flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50">Convert Another File</button>
+            </div>
+            <p id="image-error" class="text-center text-sm text-red-500 hidden"></p>
+        </div>
+        
+        <!-- Unit Converter Section -->
+        <div id="unit-converter-section" class="hidden space-y-4 pt-4">
+            <h2 class="text-xl font-semibold text-slate-700 text-center">Megabytes to Kilobytes</h2>
+            <div>
+                <label for="mb-input" class="block text-sm font-medium text-slate-700">Megabytes (MB)</label>
+                <input type="number" id="mb-input" placeholder="Enter value in MB" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            </div>
+            <div class="text-center">
+                <p class="text-2xl font-bold text-blue-600" id="kb-result">&nbsp;</p>
+                <p class="text-sm text-slate-500">Result in Kilobytes (KB)</p>
+            </div>
+            <!-- Gemini Context Section -->
+            <div id="unit-context-container" class="hidden text-center space-y-2 pt-4 border-t">
+                <button id="get-context-btn" class="mx-auto flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">âœ¨ What can this much data store?</button>
+                <div id="context-loader" class="hidden flex justify-center items-center h-10"><svg class="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>
+                <p id="context-result" class="text-sm text-slate-700 bg-slate-50 p-3 rounded-md hidden"></p>
+                <p id="context-error" class="text-sm text-red-500 hidden"></p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const { jsPDF } = window.jspdf;
+
+        // --- Tab Management ---
+        const unitTab = document.getElementById('unit-tab');
+        const imageTab = document.getElementById('image-tab');
+        const unitConverterSection = document.getElementById('unit-converter-section');
+        const imageConverterSection = document.getElementById('image-converter-section');
+
+        unitTab.addEventListener('click', () => {
+            unitTab.classList.add('tab-active');
+            imageTab.classList.remove('tab-active');
+            unitConverterSection.classList.remove('hidden');
+            imageConverterSection.classList.add('hidden');
+        });
+
+        imageTab.addEventListener('click', () => {
+            imageTab.classList.add('tab-active');
+            unitTab.classList.remove('tab-active');
+            imageConverterSection.classList.remove('hidden');
+            unitConverterSection.classList.add('hidden');
+        });
+
+        // --- Gemini API Call Helper ---
+        async function callGeminiApi(payload, maxRetries = 3) {
+            // The API key is an empty string. The execution environment will handle authentication.
+            const apiKey = ""; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (text) return text;
+                    throw new Error("Invalid API response structure.");
+                } catch (error) {
+                    console.error(`Attempt ${i + 1} failed:`, error.message);
+                    if (i === maxRetries - 1) throw error;
+                    await new Promise(res => setTimeout(res, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+        
+        // --- Unit Converter ---
+        const mbInput = document.getElementById('mb-input');
+        const kbResult = document.getElementById('kb-result');
+        const unitContextContainer = document.getElementById('unit-context-container');
+        const getContextBtn = document.getElementById('get-context-btn');
+        const contextLoader = document.getElementById('context-loader');
+        const contextResult = document.getElementById('context-result');
+        const contextError = document.getElementById('context-error');
+
+        mbInput.addEventListener('input', () => {
+            const mbValue = parseFloat(mbInput.value);
+            if (!isNaN(mbValue) && mbValue > 0) {
+                kbResult.textContent = (mbValue * 1024).toLocaleString();
+                unitContextContainer.classList.remove('hidden');
+                contextResult.classList.add('hidden');
+                contextError.classList.add('hidden');
+            } else {
+                kbResult.innerHTML = '&nbsp;';
+                unitContextContainer.classList.add('hidden');
+            }
+        });
+
+        getContextBtn.addEventListener('click', async () => {
+            const mbValue = mbInput.value;
+            if (!mbValue) return;
+            contextLoader.classList.remove('hidden');
+            contextResult.classList.add('hidden');
+            contextError.classList.add('hidden');
+            getContextBtn.disabled = true;
+
+            const payload = {
+                contents: [{ parts: [{ text: `In simple, non-technical terms, what can be stored in ${mbValue} MB of digital space? Give 2-3 relatable examples. Format the response as a single paragraph.` }] }]
+            };
+
+            try {
+                const responseText = await callGeminiApi(payload);
+                contextResult.textContent = responseText;
+                contextResult.classList.remove('hidden');
+            } catch (error) {
+                contextError.textContent = 'Could not get context. Please try again.';
+                contextError.classList.remove('hidden');
+            } finally {
+                contextLoader.classList.add('hidden');
+                getContextBtn.disabled = false;
+            }
+        });
+
+        // --- Image & PDF Converter ---
+        const imageUploadContainer = document.getElementById('image-upload-container');
+        const imageProcessingContainer = document.getElementById('image-processing-container');
+        const imageDropArea = document.getElementById('image-drop-area');
+        const imageUploadInput = document.getElementById('image-upload-input');
+        const imagePreview = document.getElementById('image-preview');
+        const formatSelect = document.getElementById('format-select');
+        const qualityContainer = document.getElementById('quality-container');
+        const qualitySlider = document.getElementById('quality-slider');
+        const qualityValue = document.getElementById('quality-value');
+        const convertBtn = document.getElementById('convert-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const imageError = document.getElementById('image-error');
+        
+        // AI Tools Elements
+        const generateAltTextBtn = document.getElementById('generate-alt-text-btn');
+        const altTextLoader = document.getElementById('alt-text-loader');
+        const altTextResultContainer = document.getElementById('alt-text-result-container');
+        const altTextResult = document.getElementById('alt-text-result');
+        const copyAltTextBtn = document.getElementById('copy-alt-text-btn');
+        const altTextError = document.getElementById('alt-text-error');
+        
+        const generatePostBtn = document.getElementById('generate-post-btn');
+        const postLoader = document.getElementById('post-loader');
+        const postResultContainer = document.getElementById('post-result-container');
+        const postResult = document.getElementById('post-result');
+        const postError = document.getElementById('post-error');
+
+
+        let uploadedFile = null;
+        let imageBase64 = null;
+        let uploadedFileUrl = null;
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => imageDropArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }));
+        ['dragenter', 'dragover'].forEach(eventName => imageDropArea.addEventListener(eventName, () => imageDropArea.classList.add('drag-over')));
+        ['dragleave', 'drop'].forEach(eventName => imageDropArea.addEventListener(eventName, () => imageDropArea.classList.remove('drag-over')));
+        imageDropArea.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+        imageUploadInput.addEventListener('change', e => handleFile(e.target.files[0]));
+        
+        function handleFile(file) {
+            imageError.classList.add('hidden');
+            resetAiToolsState();
+            if (!file || !['image/jpeg', 'image/png'].includes(file.type)) {
+                imageError.textContent = 'Invalid file type. Please upload a JPG or PNG.';
+                imageError.classList.remove('hidden');
+                return;
+            }
+            uploadedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedFileUrl = e.target.result;
+                imageBase64 = uploadedFileUrl.split(',')[1];
+                imagePreview.src = uploadedFileUrl;
+                imageUploadContainer.classList.add('hidden');
+                imageProcessingContainer.classList.remove('hidden');
+                formatSelect.value = file.type === 'image/jpeg' ? 'png' : 'jpeg';
+                toggleQualitySlider();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        formatSelect.addEventListener('change', toggleQualitySlider);
+        qualitySlider.addEventListener('input', () => {
+            qualityValue.textContent = `${qualitySlider.value}%`;
+        });
+
+        function toggleQualitySlider() {
+            if (formatSelect.value === 'jpeg') {
+                qualityContainer.classList.remove('hidden');
+            } else {
+                qualityContainer.classList.add('hidden');
+            }
+        }
+
+        convertBtn.addEventListener('click', () => {
+            if (!uploadedFileUrl) return;
+            const targetFormat = formatSelect.value;
+            const originalExtension = uploadedFile.name.split('.').pop();
+            const fileName = uploadedFile.name.replace(new RegExp(`\\.${originalExtension}$`), `.${targetFormat}`);
+            
+            if (targetFormat === 'pdf') {
+                generatePdf(fileName);
+            } else {
+                generateImage(targetFormat, fileName);
+            }
+        });
+
+        function generateAndDownload(dataUrl, fileName) {
+             const link = document.createElement('a');
+             link.href = dataUrl;
+             link.download = fileName;
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+        }
+
+        function generateImage(format, fileName) {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (format === 'jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                ctx.drawImage(img, 0, 0);
+
+                let dataUrl;
+                if (format === 'jpeg') {
+                    const quality = qualitySlider.value / 100;
+                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                } else {
+                    dataUrl = canvas.toDataURL('image/png');
+                }
+                
+                generateAndDownload(dataUrl, fileName);
+            };
+            img.src = uploadedFileUrl;
+        }
+
+        function generatePdf(fileName) {
+            const img = new Image();
+            img.onload = () => {
+                const doc = new jsPDF({ orientation: img.width > img.height ? 'l' : 'p', unit: 'px', format: [img.width, img.height] });
+                doc.addImage(img, uploadedFile.type.split('/')[1].toUpperCase(), 0, 0, img.width, img.height);
+                const pdfDataUri = doc.output('datauristring');
+                generateAndDownload(pdfDataUri, fileName);
+            };
+            img.src = uploadedFileUrl;
+        }
+        
+        // --- AI Tools Logic ---
+        generateAltTextBtn.addEventListener('click', async () => {
+            if (!imageBase64) return;
+            altTextLoader.classList.remove('hidden');
+            altTextResultContainer.classList.add('hidden');
+            altTextError.classList.add('hidden');
+            generateAltTextBtn.disabled = true;
+
+            const payload = {
+                contents: [{ parts: [
+                    { text: "Generate a concise, descriptive alt-text for this image for accessibility. It should be one sentence." },
+                    { inlineData: { mimeType: uploadedFile.type, data: imageBase64 } }
+                ] }]
+            };
+            
+            try {
+                const responseText = await callGeminiApi(payload);
+                altTextResult.textContent = responseText;
+                altTextResultContainer.classList.remove('hidden');
+            } catch (error) {
+                altTextError.textContent = 'Could not generate alt-text.';
+                altTextError.classList.remove('hidden');
+            } finally {
+                altTextLoader.classList.add('hidden');
+                generateAltTextBtn.disabled = false;
+            }
+        });
+        
+        generatePostBtn.addEventListener('click', async () => {
+            if (!imageBase64) return;
+            postLoader.classList.remove('hidden');
+            postResultContainer.classList.add('hidden');
+            postError.classList.add('hidden');
+            generatePostBtn.disabled = true;
+
+            const payload = {
+                contents: [{ parts: [
+                    { text: "Generate a short, engaging social media caption for this image. Include a few relevant hashtags." },
+                    { inlineData: { mimeType: uploadedFile.type, data: imageBase64 } }
+                ] }]
+            };
+
+            try {
+                const responseText = await callGeminiApi(payload);
+                postResult.value = responseText;
+                postResultContainer.classList.remove('hidden');
+            } catch (error) {
+                postError.textContent = 'Could not generate the post.';
+                postError.classList.remove('hidden');
+            } finally {
+                postLoader.classList.add('hidden');
+                generatePostBtn.disabled = false;
+            }
+        });
+
+        copyAltTextBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(altTextResult.textContent).catch(err => console.error('Copy failed', err));
+        });
+
+        function resetAiToolsState() {
+            altTextLoader.classList.add('hidden');
+            altTextResultContainer.classList.add('hidden');
+            altTextError.classList.add('hidden');
+            generateAltTextBtn.disabled = false;
+
+            postLoader.classList.add('hidden');
+            postResultContainer.classList.add('hidden');
+            postError.classList.add('hidden');
+            generatePostBtn.disabled = false;
+        }
+
+        resetBtn.addEventListener('click', () => {
+            uploadedFile = null;
+            imageBase64 = null;
+            uploadedFileUrl = null;
+            imageUploadInput.value = '';
+            imageUploadContainer.classList.remove('hidden');
+            imageProcessingContainer.classList.add('hidden');
+            imageError.classList.add('hidden');
+            resetAiToolsState();
+        });
+    });
+</script>
+
+</body>
+</html>
+
